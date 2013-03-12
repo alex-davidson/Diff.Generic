@@ -1,0 +1,9 @@
+*.user
+*.suo
+Diff.Generic.sln.cache
+_ReSharper*
+Diff.Generic/obj/
+Diff.Generic/bin/
+Diff.Generic.Tests/obj/
+Diff.Generic.Tests/bin/
+
