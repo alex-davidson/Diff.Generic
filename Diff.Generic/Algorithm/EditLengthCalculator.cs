@@ -21,6 +21,18 @@ namespace Diff.Generic.Algorithm
             reverseDiagonal = new int[max + 1];
         }
 
+        /// <summary>
+        /// Calculates edit length in the specified range.
+        /// </summary>
+        /// <remarks>
+        /// The start and end parameters indicate substrings of A and B. Edit distance is calculated
+        /// between these substrings.
+        /// </remarks>
+        /// <param name="startA"></param>
+        /// <param name="endA"></param>
+        /// <param name="startB"></param>
+        /// <param name="endB"></param>
+        /// <returns></returns>
         public EditLengthResult CalculateEditLength(int startA, int endA, int startB, int endB)
         {
             if (old.Length == 0 && @new.Length == 0)
@@ -28,31 +40,31 @@ namespace Diff.Generic.Algorithm
                 return new EditLengthResult();
             }
 
-            var N = endA - startA;
-            var M = endB - startB;
-            var MAX = M + N + 1;
-            var HALF = MAX / 2;
-            var delta = N - M;
+            var aLength = endA - startA;
+            var bLength = endB - startB;
+            var max = bLength + aLength + 1;
+            var half = max / 2;
+            var delta = aLength - bLength;
             var deltaEven = delta % 2 == 0;
-            forwardDiagonal[1 + HALF] = 0;
-            reverseDiagonal[1 + HALF] = N + 1;
+            forwardDiagonal[1 + half] = 0;
+            reverseDiagonal[1 + half] = aLength + 1;
 
             Log.WriteLine("Comparing strings");
             Log.WriteLine("\t{0} of length {1}", old, old.Length);
             Log.WriteLine("\t{0} of length {1}", @new, @new.Length);
 
-            for (var D = 0; D <= HALF; D++)
+            for (var d = 0; d <= half; d++)
             {
-                Log.WriteLine("\nSearching for a {0}-Path", D);
+                Log.WriteLine("\nSearching for a {0}-Path", d);
                 // forward D-path
                 Log.WriteLine("\tSearching for foward path");
                 Edit lastEdit;
-                for (var k = -D; k <= D; k += 2)
+                for (var k = -d; k <= d; k += 2)
                 {
                     Log.WriteLine("\n\t\tSearching diagonal {0}", k);
-                    var kIndex = k + HALF;
+                    var kIndex = k + half;
                     int x;
-                    if (k == -D || (k != D && forwardDiagonal[kIndex - 1] < forwardDiagonal[kIndex + 1]))
+                    if (k == -d || (k != d && forwardDiagonal[kIndex - 1] < forwardDiagonal[kIndex + 1]))
                     {
                         x = forwardDiagonal[kIndex + 1]; // y up    move down from previous diagonal
                         lastEdit = Edit.InsertDown;
@@ -68,7 +80,7 @@ namespace Diff.Generic.Algorithm
                     var startX = x;
                     var startY = y;
                     Log.WriteLine("({0},{1})", x, y);
-                    while (x < N && y < M && old[x + startA] == @new[y + startB])
+                    while (x < aLength && y < bLength && old[x + startA] == @new[y + startB])
                     {
                         x += 1;
                         y += 1;
@@ -79,16 +91,16 @@ namespace Diff.Generic.Algorithm
 
                     if (!deltaEven)
                     {
-                        if (k - delta >= (-D + 1) && k - delta <= (D - 1))
+                        if (k - delta >= (-d + 1) && k - delta <= (d - 1))
                         {
-                            var revKIndex = (k - delta) + HALF;
+                            var revKIndex = (k - delta) + half;
                             var revX = reverseDiagonal[revKIndex];
                             var revY = revX - k;
                             if (revX <= x && revY <= y)
                             {
                                 var res = new EditLengthResult
                                     {
-                                        EditLength = 2*D - 1,
+                                        EditLength = 2*d - 1,
                                         StartX = startX + startA,
                                         StartY = startY + startB,
                                         EndX = x + startA,
@@ -103,12 +115,12 @@ namespace Diff.Generic.Algorithm
 
                 // reverse D-path
                 Log.WriteLine("\n\tSearching for a reverse path");
-                for (var k = -D; k <= D; k += 2)
+                for (var k = -d; k <= d; k += 2)
                 {
                     Log.WriteLine("\n\t\tSearching diagonal {0} ({1})", k, k + delta);
-                    var kIndex = k + HALF;
+                    var kIndex = k + half;
                     int x;
-                    if (k == -D || (k != D && reverseDiagonal[kIndex + 1] <= reverseDiagonal[kIndex - 1]))
+                    if (k == -d || (k != d && reverseDiagonal[kIndex + 1] <= reverseDiagonal[kIndex - 1]))
                     {
                         x = reverseDiagonal[kIndex + 1] - 1; // move left from k+1 diagonal
                         lastEdit = Edit.DeleteLeft;
@@ -137,16 +149,16 @@ namespace Diff.Generic.Algorithm
 
                     if (deltaEven)
                     {
-                        if (k + delta >= -D && k + delta <= D)
+                        if (k + delta >= -d && k + delta <= d)
                         {
-                            int forKIndex = (k + delta) + HALF;
+                            int forKIndex = (k + delta) + half;
                             int forX = forwardDiagonal[forKIndex];
                             int forY = forX - (k + delta);
                             if (forX >= x && forY >= y)
                             {
                                 var res = new EditLengthResult
                                     {
-                                        EditLength = 2 * D,
+                                        EditLength = 2 * d,
                                         StartX = x + startA,
                                         StartY = y + startB,
                                         EndX = endX + startA,

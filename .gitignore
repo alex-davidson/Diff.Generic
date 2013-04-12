@@ -2,8 +2,12 @@
 *.suo
 Diff.Generic.sln.cache
 _ReSharper*
+*.vspx
+*.vshost.*
+*.psess
 Diff.Generic/obj/
 Diff.Generic/bin/
 Diff.Generic.Tests/obj/
 Diff.Generic.Tests/bin/
-
+Diff.Generic.Performance/obj/
+Diff.Generic.Performance/bin/
