@@ -1,0 +1,6 @@
+C:\dev\Diff.Generic\Diff.Generic.Performance\bin\Debug\Diff.Generic.Performance.exe.config
+C:\dev\Diff.Generic\Diff.Generic.Performance\bin\Debug\Diff.Generic.Performance.exe
+C:\dev\Diff.Generic\Diff.Generic.Performance\bin\Debug\Diff.Generic.Performance.pdb
+C:\dev\Diff.Generic\Diff.Generic.Performance\obj\Debug\Diff.Generic.Performance.csprojResolveAssemblyReference.cache
+C:\dev\Diff.Generic\Diff.Generic.Performance\obj\Debug\Diff.Generic.Performance.exe
+C:\dev\Diff.Generic\Diff.Generic.Performance\obj\Debug\Diff.Generic.Performance.pdb

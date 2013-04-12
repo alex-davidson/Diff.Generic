@@ -5,6 +5,9 @@ using Diff.Generic.Model;
 
 namespace Diff.Generic
 {
+    /// <summary>
+    /// Text-related diffing functions.
+    /// </summary>
     public class Differ : IDiffer
     {
         public DiffResult<string> CreateLineDiffs(string oldText, string newText, bool ignoreWhitespace)
@@ -55,13 +58,14 @@ namespace Diff.Generic
             if (oldText == null) throw new ArgumentNullException("oldText");
             if (newText == null) throw new ArgumentNullException("newText");
 
+            var separatorHash = new HashSet<char>(separators);
 
             return CreateCustomDiffs(
                 oldText,
                 newText,
                 ignoreWhitespace,
                 ignoreCase,
-                str => SmartSplit(str, separators));
+                str => SmartSplit(str, separatorHash));
         }
 
         public DiffResult<string> CreateCustomDiffs(string oldText, string newText, bool ignoreWhiteSpace, Func<string, string[]> chunker)
@@ -69,7 +73,7 @@ namespace Diff.Generic
             return CreateCustomDiffs(oldText, newText, ignoreWhiteSpace, false, chunker);
         }
 
-        private static IEnumerable<string> ApplyStringChunking(string original, bool ignoreWhiteSpace, bool ignoreCase, Func<string, string[]> chunker)
+        private static IList<string> ApplyStringChunking(string original, bool ignoreWhiteSpace, bool ignoreCase, Func<string, string[]> chunker)
         {
             if (String.IsNullOrEmpty(original)) return new string[0];
 
@@ -80,7 +84,7 @@ namespace Diff.Generic
                 if (ignoreWhiteSpace) p = p.Trim();
                 if (ignoreCase) p = p.ToUpperInvariant();
                 return p;
-            });
+            }).ToList();
         }
 
         public DiffResult<string> CreateCustomDiffs(string oldText, string newText, bool ignoreWhiteSpace, bool ignoreCase, Func<string, string[]> chunker)
@@ -100,7 +104,7 @@ namespace Diff.Generic
             return str.Replace("\r\n", "\n").Replace("\r", "\n");
         }
 
-        private static string[] SmartSplit(string str, IEnumerable<char> delims)
+        private static string[] SmartSplit(string str, HashSet<char> delims)
         {
             var list = new List<string>();
             int begin = 0;

@@ -1,4 +1,4 @@
-﻿namespace Diff.Generic.Model
+﻿namespace Diff.Generic.Algorithm
 {
     public enum Edit
     {

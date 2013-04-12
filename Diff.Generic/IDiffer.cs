@@ -3,6 +3,9 @@ using Diff.Generic.Model;
 
 namespace Diff.Generic
 {
+    /// <summary>
+    /// Text-related diffing functions.
+    /// </summary>
     public interface IDiffer
     {
         DiffResult<string> CreateLineDiffs(string oldText, string newText, bool ignoreWhitespace);

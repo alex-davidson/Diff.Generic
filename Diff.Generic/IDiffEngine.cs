@@ -9,6 +9,6 @@ namespace Diff.Generic
     /// </summary>
     public interface IDiffEngine<T>
     {
-        DiffResult<T> CreateDiffs(IEnumerable<T> oldStream, IEnumerable<T> newStream);
+        DiffResult<T> CreateDiffs(IList<T> oldStream, IList<T> newStream);
     }
 }
