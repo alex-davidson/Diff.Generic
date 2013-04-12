@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Diff.Generic.Model;
 
 namespace Diff.Generic
@@ -21,7 +23,8 @@ namespace Diff.Generic
             if (newText == null) throw new ArgumentNullException("newText");
 
 
-            return CreateCustomDiffs(oldText, newText, ignoreWhitespace,ignoreCase, str => NormalizeNewlines(str).Split('\n'));
+            return CreateCustomDiffs(oldText, newText, ignoreWhitespace, ignoreCase,
+                                     str => NormalizeNewlines(str).Split('\n'));
         }
 
         public DiffResult<string> CreateCharacterDiffs(string oldText, string newText, bool ignoreWhitespace)
@@ -29,7 +32,8 @@ namespace Diff.Generic
             return CreateCharacterDiffs(oldText, newText, ignoreWhitespace, false);
         }
 
-        public DiffResult<string> CreateCharacterDiffs(string oldText, string newText, bool ignoreWhitespace, bool ignoreCase)
+        public DiffResult<string> CreateCharacterDiffs(string oldText, string newText, bool ignoreWhitespace,
+                                                       bool ignoreCase)
         {
             if (oldText == null) throw new ArgumentNullException("oldText");
             if (newText == null) throw new ArgumentNullException("newText");
@@ -40,12 +44,7 @@ namespace Diff.Generic
                 newText,
                 ignoreWhitespace,
                 ignoreCase,
-                str =>
-                    {
-                        var s = new string[str.Length];
-                        for (int i = 0; i < str.Length; i++) s[i] = str[i].ToString();
-                        return s;
-                    });
+                str => str.ToCharArray().Select(Char.ToString).ToArray());
         }
 
         public DiffResult<string> CreateWordDiffs(string oldText, string newText, bool ignoreWhitespace, char[] separators)
@@ -58,14 +57,14 @@ namespace Diff.Generic
             if (oldText == null) throw new ArgumentNullException("oldText");
             if (newText == null) throw new ArgumentNullException("newText");
 
-            var separatorHash = new HashSet<char>(separators);
+            var splitter = CreateSmartSplitter(separators);
 
             return CreateCustomDiffs(
                 oldText,
                 newText,
                 ignoreWhitespace,
                 ignoreCase,
-                str => SmartSplit(str, separatorHash));
+                splitter);
         }
 
         public DiffResult<string> CreateCustomDiffs(string oldText, string newText, bool ignoreWhiteSpace, Func<string, string[]> chunker)
@@ -73,30 +72,59 @@ namespace Diff.Generic
             return CreateCustomDiffs(oldText, newText, ignoreWhiteSpace, false, chunker);
         }
 
-        private static IList<string> ApplyStringChunking(string original, bool ignoreWhiteSpace, bool ignoreCase, Func<string, string[]> chunker)
+        class TextChunkEqualityComparer : IEqualityComparer<string>
+        {
+            private readonly bool ignoreWhiteSpace;
+            private readonly IEqualityComparer<string> baseComparer;
+            public TextChunkEqualityComparer(bool ignoreWhiteSpace, bool ignoreCase)
+            {
+                this.ignoreWhiteSpace = ignoreWhiteSpace;
+                baseComparer = ignoreCase ? StringComparer.InvariantCultureIgnoreCase : StringComparer.InvariantCulture;
+            }
+
+            private string Transform(string s)
+            {
+                return ignoreWhiteSpace ? s.Trim() : s;
+            }
+
+            public bool Equals(string x, string y)
+            {
+                return baseComparer.Equals(Transform(x), Transform(y));
+            }
+
+            public int GetHashCode(string obj)
+            {
+                return baseComparer.GetHashCode(Transform(obj));
+            }
+        }
+
+        private static IList<string> ApplyStringChunking(string original, Func<string, string[]> chunker)
         {
             if (String.IsNullOrEmpty(original)) return new string[0];
 
             var pieces = chunker(original);
 
-            return pieces.Select(p =>
-            {
-                if (ignoreWhiteSpace) p = p.Trim();
-                if (ignoreCase) p = p.ToUpperInvariant();
-                return p;
-            }).ToList();
+            return pieces.ToList();
         }
 
-        public DiffResult<string> CreateCustomDiffs(string oldText, string newText, bool ignoreWhiteSpace, bool ignoreCase, Func<string, string[]> chunker)
+        public DiffResult<string> CreateCustomDiffs(string oldText, string newText, bool ignoreWhiteSpace,
+                                                    bool ignoreCase, Func<string, string[]> chunker)
+        {
+            return CreateCustomDiffs(oldText, newText, chunker,
+                                     new TextChunkEqualityComparer(ignoreWhiteSpace, ignoreCase));
+            
+        }
+
+        public DiffResult<string> CreateCustomDiffs(string oldText, string newText, Func<string, string[]> chunker, IEqualityComparer<string> equalityComparer)
         {
             if (oldText == null) throw new ArgumentNullException("oldText");
             if (newText == null) throw new ArgumentNullException("newText");
             if (chunker == null) throw new ArgumentNullException("chunker");
 
-            var oldStream = ApplyStringChunking(oldText, ignoreWhiteSpace, ignoreCase, chunker);
-            var newStream = ApplyStringChunking(newText, ignoreWhiteSpace, ignoreCase, chunker);
+            var oldStream = ApplyStringChunking(oldText, chunker);
+            var newStream = ApplyStringChunking(newText, chunker);
 
-            return new DiffEngine<string>().CreateDiffs(oldStream, newStream);
+            return new DiffEngine<string>().CreateDiffs(oldStream, newStream, equalityComparer);
         }
 
         private static string NormalizeNewlines(string str)
@@ -104,7 +132,14 @@ namespace Diff.Generic
             return str.Replace("\r\n", "\n").Replace("\r", "\n");
         }
 
-        private static string[] SmartSplit(string str, HashSet<char> delims)
+        private static Func<string, string[]> CreateSmartSplitter(IEnumerable<char> delimiters)
+        {
+            var delimiterHash = new HashSet<char>(delimiters);
+            return s => SmartSplit(s, delimiterHash);
+        }
+
+        
+        private static string[] SmartSplit(string str, ICollection<char> delims)
         {
             var list = new List<string>();
             int begin = 0;
@@ -120,7 +155,6 @@ namespace Diff.Generic
                     list.Add(str.Substring(begin, (i + 1 - begin)));
                 }
             }
-
             return list.ToArray();
         }
     }

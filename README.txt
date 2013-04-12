@@ -35,7 +35,7 @@ relation only affects the initial translation and has no bearing at all on
 the implementation or efficiency of the diffing algorithm.
 
 The hash function's implementation is a dictionary which simply returns the
-next unused integer when it sees a new chunk values. An interesting side
+next unused integer when it sees a new chunk value. An interesting side
 effect of this is that no integer in stream A (left side, or 'old' side) will
 ever be larger than its position in the array. This may prove useful for
 optimisations.

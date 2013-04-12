@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Diff.Generic.Model;
 
 namespace Diff.Generic
@@ -16,5 +17,7 @@ namespace Diff.Generic
         DiffResult<string> CreateWordDiffs(string oldText, string newText, bool ignoreWhitespace, bool ignoreCase, char[] separators);
         DiffResult<string> CreateCustomDiffs(string oldText, string newText, bool ignoreWhiteSpace, Func<string, string[]> chunker);
         DiffResult<string> CreateCustomDiffs(string oldText, string newText, bool ignoreWhiteSpace, bool ignoreCase, Func<string, string[]> chunker);
+
+        DiffResult<string> CreateCustomDiffs(string oldText, string newText, Func<string, string[]> chunker, IEqualityComparer<string> equalityComparer);
     }
 }
