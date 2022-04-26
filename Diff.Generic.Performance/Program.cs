@@ -29,7 +29,7 @@ namespace Diff.Generic.Performance
 
         public static void Main(string[] args)
         {
-            var diffplexImplementation = new DiffPlex.Differ();
+            var diffplexImplementation = new Differ();
             var diffGenericImplementation = new Differ();
 
             var textGenerator = new BodyOfTextGenerator();

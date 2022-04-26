@@ -11,9 +11,6 @@ namespace Diff.Generic.Tests.Algorithm
         [Fact]
         public void Will_throw_if_arrays_are_null()
         {
-            int[] a = null;
-            int[] b = null;
-
             var ex = Record.Exception(() =>
                 {
                     new EditLengthCalculator(null, null);
