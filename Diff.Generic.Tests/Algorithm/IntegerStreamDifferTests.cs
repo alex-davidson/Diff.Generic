@@ -15,8 +15,8 @@ namespace Diff.Generic.Tests.Algorithm
         {
             var modifications = integerStreamDiffer.GetModifications(new int[0], new int[0]);
 
-            Assert.Equal(0, modifications.Old.Length);
-            Assert.Equal(0, modifications.New.Length);
+            Assert.Empty(modifications.Old);
+            Assert.Empty(modifications.New);
         }
 
         [Fact]

@@ -79,7 +79,7 @@ namespace Diff.Generic
             public TextChunkEqualityComparer(bool ignoreWhiteSpace, bool ignoreCase)
             {
                 this.ignoreWhiteSpace = ignoreWhiteSpace;
-                baseComparer = ignoreCase ? StringComparer.InvariantCultureIgnoreCase : StringComparer.InvariantCulture;
+                baseComparer = ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
             }
 
             private string Transform(string s)
